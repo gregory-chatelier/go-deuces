@@ -50,7 +50,11 @@ import (
 
 func main() {
 	// Create a card
-	card, _ := deuces.NewCard("Qh")
+	card, err := deuces.NewCard("Qh")
+	if err != nil {
+		fmt.Printf("Error creating card: %v\n", err)
+		return
+	}
 	fmt.Printf("Card: %s\n", card.IntToPrettyStr())
 
 	// Get card properties
@@ -94,21 +98,31 @@ import (
 	"go-deuces/deuces"
 )
 
+func mustNewCard(s string) deuces.Card {
+	card, err := deuces.NewCard(s)
+	if err != nil {
+		// In a real application, you would handle this error more gracefully,
+		// e//.g., return an error or a default card. For example brevity, we panic.
+		panic(fmt.Sprintf("failed to create card %s: %v", s, err))
+	}
+	return card
+}
+
 func main() {
 	// Create an evaluator
 	evaluator := deuces.NewEvaluator()
 
 	// Define a board and a hand
 	board := []deuces.Card{
-		func() deuces.Card { c, _ := deuces.NewCard("As"); return c }(),
-		func() deuces.Card { c, _ := deuces.NewCard("Ks"); return c }(),
-		func() deuces.Card { c, _ := deuces.NewCard("Qs"); return c }(),
-		func() deuces.Card { c, _ := deuces.NewCard("Js"); return c }(),
-		func() deuces.Card { c, _ := deuces.NewCard("Ts"); return c }(),
+		mustNewCard("As"),
+		mustNewCard("Ks"),
+		mustNewCard("Qs"),
+		mustNewCard("Js"),
+		mustNewCard("Ts"),
 	}
 	hand := []deuces.Card{
-		func() deuces.Card { c, _ := deuces.NewCard("2c"); return c }(),
-		func() deuces.Card { c, _ := deuces.NewCard("3d"); return c }(),
+		mustNewCard("2c"),
+		mustNewCard("3d"),
 	}
 
 	// Evaluate the hand
