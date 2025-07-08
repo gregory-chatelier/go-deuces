@@ -10,7 +10,7 @@ type Deck struct {
 	Cards []Card
 }
 
-var ( 
+var (
 	// fullDeck is a cached slice of a full deck of cards.
 	fullDeck []Card
 )
@@ -35,8 +35,8 @@ func NewDeck() *Deck {
 
 // Shuffle shuffles the deck.
 func (d *Deck) Shuffle() {
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(d.Cards), func(i, j int) {
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+	rng.Shuffle(len(d.Cards), func(i, j int) {
 		d.Cards[i], d.Cards[j] = d.Cards[j], d.Cards[i]
 	})
 }

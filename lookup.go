@@ -6,33 +6,33 @@ import (
 
 // LookupTable stores the precomputed lookup tables for poker hand evaluation.
 type LookupTable struct {
-	FlushLookup   map[int]int
+	FlushLookup    map[int]int
 	UnsuitedLookup map[int]int
 }
 
 const (
-	MaxStraightFlush  = 10
-	MaxFourOfAKind  = 166
-	MaxFullHouse      = 322
-	MaxFlush           = 1599
-	MaxStraight        = 1609
-	MaxThreeOfAKind = 2467
-	MaxTwoPair        = 3325
-	MaxPair            = 6185
-	MaxHighCard       = 7462
+	MaxStraightFlush = 10
+	MaxFourOfAKind   = 166
+	MaxFullHouse     = 322
+	MaxFlush         = 1599
+	MaxStraight      = 1609
+	MaxThreeOfAKind  = 2467
+	MaxTwoPair       = 3325
+	MaxPair          = 6185
+	MaxHighCard      = 7462
 )
 
 var (
 	MaxToRankClass = map[int]int{
-		MaxStraightFlush:  1,
-		MaxFourOfAKind:  2,
-		MaxFullHouse:      3,
-		MaxFlush:           4,
-		MaxStraight:        5,
-		MaxThreeOfAKind: 6,
-		MaxTwoPair:        7,
-		MaxPair:            8,
-		MaxHighCard:       9,
+		MaxStraightFlush: 1,
+		MaxFourOfAKind:   2,
+		MaxFullHouse:     3,
+		MaxFlush:         4,
+		MaxStraight:      5,
+		MaxThreeOfAKind:  6,
+		MaxTwoPair:       7,
+		MaxPair:          8,
+		MaxHighCard:      9,
 	}
 
 	RankClassToString = map[int]string{
@@ -51,7 +51,7 @@ var (
 // NewLookupTable creates and initializes a new LookupTable.
 func NewLookupTable() *LookupTable {
 	lt := &LookupTable{
-		FlushLookup:   make(map[int]int),
+		FlushLookup:    make(map[int]int),
 		UnsuitedLookup: make(map[int]int),
 	}
 	lt.flushes()

@@ -1,8 +1,5 @@
 package deuces
 
-import (
-)
-
 // Evaluator evaluates hand strengths.
 type Evaluator struct {
 	lookupTable *LookupTable
@@ -23,9 +20,9 @@ func (e *Evaluator) Evaluate(hand []Card, board []Card) int {
 	case 5:
 		return e.evaluateFive(allCards)
 	case 6:
-		return e.evaluateSix(allCards)
+		return e.evaluateBestFiveOutOfN(allCards)
 	case 7:
-		return e.evaluateSeven(allCards)
+		return e.evaluateBestFiveOutOfN(allCards)
 	default:
 		return -1 // Should not happen with valid input
 	}
@@ -44,20 +41,7 @@ func (e *Evaluator) evaluateFive(cards []Card) int {
 	return e.lookupTable.UnsuitedLookup[prime]
 }
 
-func (e *Evaluator) evaluateSix(cards []Card) int {
-	minimum := MaxHighCard
-
-	combinations := combinationsCards(cards, 5)
-	for _, combo := range combinations {
-		score := e.evaluateFive(combo)
-		if score < minimum {
-			minimum = score
-		}
-	}
-	return minimum
-}
-
-func (e *Evaluator) evaluateSeven(cards []Card) int {
+func (e *Evaluator) evaluateBestFiveOutOfN(cards []Card) int {
 	minimum := MaxHighCard
 
 	combinations := combinationsCards(cards, 5)

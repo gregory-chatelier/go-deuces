@@ -20,7 +20,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	pprof.StartCPUProfile(cpuProfileFile)
+	if err := pprof.StartCPUProfile(cpuProfileFile); err != nil {
+		log.Fatal(err)
+	}
 	defer pprof.StopCPUProfile()
 
 	// Open the CSV file

@@ -3,6 +3,7 @@ package deuces_test
 import (
 	"go-deuces"
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -14,10 +15,29 @@ func TestNewDeck(t *testing.T) {
 }
 
 func TestDeck_Shuffle(t *testing.T) {
-	d1 := deuces.NewDeck()
-	d2 := deuces.NewDeck()
-	if reflect.DeepEqual(d1.Cards, d2.Cards) {
-		t.Error("Shuffle() failed, decks are the same")
+	unshuffledDeck := deuces.GetFullDeck()
+	shuffledDeck := deuces.NewDeck()
+
+	// Check that the shuffled deck is not the same as the unshuffled deck
+	if reflect.DeepEqual(unshuffledDeck, shuffledDeck.Cards) {
+		t.Error("Shuffle() failed, deck is not shuffled")
+	}
+
+	// Check that the shuffled deck still contains all 52 unique cards
+	sortedUnshuffled := make([]deuces.Card, len(unshuffledDeck))
+	copy(sortedUnshuffled, unshuffledDeck)
+	sort.Slice(sortedUnshuffled, func(i, j int) bool {
+		return sortedUnshuffled[i] < sortedUnshuffled[j]
+	})
+
+	sortedShuffled := make([]deuces.Card, len(shuffledDeck.Cards))
+	copy(sortedShuffled, shuffledDeck.Cards)
+	sort.Slice(sortedShuffled, func(i, j int) bool {
+		return sortedShuffled[i] < sortedShuffled[j]
+	})
+
+	if !reflect.DeepEqual(sortedUnshuffled, sortedShuffled) {
+		t.Error("Shuffle() failed, cards are missing or duplicated after shuffle")
 	}
 }
 
