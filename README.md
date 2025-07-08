@@ -24,19 +24,22 @@ To build and run this project, you need to have Go installed on your system. You
     cd go-deuces
     ```
 
-2.  **Initialize Go module (if not already done):**
-
-    ```bash
-    go mod init github.com/gregory-chatelier/go-deuces
-    ```
-
-3.  **Run tests to verify the installation:**
+2.  **Run tests to verify the installation:**
 
     ```bash
     go test ./...
     ```
 
+
 ## Usage Examples
+
+To see a complete working example, navigate to the `example` directory and run:
+
+```bash
+cd example
+go mod tidy
+go run main.go
+```
 
 ### Card Creation and Representation
 
@@ -45,7 +48,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/gregory-chatelier/go-deuces/deuces"
+	"github.com/gregory-chatelier/go-deuces"
 )
 
 func main() {
@@ -69,7 +72,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/gregory-chatelier/go-deuces/deuces"
+	"github.com/gregory-chatelier/go-deuces"
 )
 
 func main() {
@@ -95,7 +98,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/gregory-chatelier/go-deuces/deuces"
+	"github.com/gregory-chatelier/go-deuces"
 )
 
 func mustNewCard(s string) deuces.Card {
