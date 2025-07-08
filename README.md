@@ -141,3 +141,7 @@ func main() {
 	fmt.Printf("Percentage rank: %.2f%%\n", percentage*100)
 }
 ```
+
+## Performance
+
+Based on benchmarks, this Go port evaluates poker hands approximately 6 to 7 times faster than the original Python Deuces library. This performance gain is achieved without leveraging Go's native threading capabilities. While significantly faster than the Python version, it's important to note that this implementation is still slower than highly optimized C/C++ implementations like Pokerstove.
