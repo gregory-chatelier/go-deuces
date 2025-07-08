@@ -1,22 +1,23 @@
-package deuces
+package deuces_test
 
 import (
+	"go-deuces"
 	"testing"
 )
 
 func TestNewCard(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected Card
+		expected deuces.Card
 		hasError bool
 	}{
-		{"As", Card(268442665), false},
-		{"2c", Card(98306), false},
-		{"Xx", Card(0), true},
+		{"As", deuces.Card(268442665), false},
+		{"2c", deuces.Card(98306), false},
+		{"Xx", deuces.Card(0), true},
 	}
 
 	for _, test := range tests {
-		card, err := NewCard(test.input)
+		card, err := deuces.NewCard(test.input)
 		if (err != nil) != test.hasError {
 			t.Errorf("NewCard(%q) error = %v, wantErr %v", test.input, err, test.hasError)
 			continue
@@ -28,7 +29,7 @@ func TestNewCard(t *testing.T) {
 }
 
 func TestCard_IntToPrettyStr(t *testing.T) {
-	card, _ := NewCard("As")
+	card, _ := deuces.NewCard("As")
 	expected := "A♠"
 	if got := card.IntToPrettyStr(); got != expected {
 		t.Errorf("IntToPrettyStr() = %q, want %q", got, expected)
@@ -36,7 +37,7 @@ func TestCard_IntToPrettyStr(t *testing.T) {
 }
 
 func TestCard_Getters(t *testing.T) {
-	card, _ := NewCard("As")
+	card, _ := deuces.NewCard("As")
 	if rank := card.GetRankInt(); rank != 12 {
 		t.Errorf("GetRankInt() = %d, want 12", rank)
 	}

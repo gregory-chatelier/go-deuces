@@ -1,37 +1,38 @@
-package deuces
+package deuces_test
 
 import (
+	"go-deuces"
 	"testing"
 )
 
-var example [][]Card
+var example [][]deuces.Card
 
 func init() {
-	example = [][]Card{
+	example = [][]deuces.Card{
 		{
-			func() Card { c, _ := NewCard("4c"); return c }(),
-			func() Card { c, _ := NewCard("As"); return c }(),
-			func() Card { c, _ := NewCard("5d"); return c }(),
-			func() Card { c, _ := NewCard("Kc"); return c }(),
-			func() Card { c, _ := NewCard("2s"); return c }(),
+			func() deuces.Card { c, _ := deuces.NewCard("4c"); return c }(),
+			func() deuces.Card { c, _ := deuces.NewCard("As"); return c }(),
+			func() deuces.Card { c, _ := deuces.NewCard("5d"); return c }(),
+			func() deuces.Card { c, _ := deuces.NewCard("Kc"); return c }(),
+			func() deuces.Card { c, _ := deuces.NewCard("2s"); return c }(),
 		},
 		{
-			func() Card { c, _ := NewCard("6c"); return c }(),
-			func() Card { c, _ := NewCard("7h"); return c }(),
+			func() deuces.Card { c, _ := deuces.NewCard("6c"); return c }(),
+			func() deuces.Card { c, _ := deuces.NewCard("7h"); return c }(),
 		},
 		{
-			func() Card { c, _ := NewCard("Ac"); return c }(),
-			func() Card { c, _ := NewCard("3h"); return c }(),
+			func() deuces.Card { c, _ := deuces.NewCard("Ac"); return c }(),
+			func() deuces.Card { c, _ := deuces.NewCard("3h"); return c }(),
 		},
 	}
 }
 
 type MockDeck struct {
 	calls int
-	data  [][]Card
+	data  [][]deuces.Card
 }
 
-func (m *MockDeck) Draw(n int) []Card {
+func (m *MockDeck) Draw(n int) []deuces.Card {
 	if m.calls >= len(m.data) {
 		return nil
 	}
@@ -46,26 +47,26 @@ func (m *MockDeck) Shuffle() {
 
 func TestGo(t *testing.T) {
 	// create a card
-	card, _ := NewCard("Qh")
+	card, _ := deuces.NewCard("Qh")
 	if card == 0 { // Assuming 0 is an invalid card or we can check for error
 		t.Errorf("Card.new('Qh') returned nil")
 	}
 
 	// create a board and hole cards
-	board := []Card{
-		func() Card { c, _ := NewCard("2h"); return c }(),
-		func() Card { c, _ := NewCard("2s"); return c }(),
-		func() Card { c, _ := NewCard("Jc"); return c }(),
+	board := []deuces.Card{
+		func() deuces.Card { c, _ := deuces.NewCard("2h"); return c }(),
+		func() deuces.Card { c, _ := deuces.NewCard("2s"); return c }(),
+		func() deuces.Card { c, _ := deuces.NewCard("Jc"); return c }(),
 	}
-	hand := []Card{
-		func() Card { c, _ := NewCard("Qs"); return c }(),
-		func() Card { c, _ := NewCard("Th"); return c }(),
+	hand := []deuces.Card{
+		func() deuces.Card { c, _ := deuces.NewCard("Qs"); return c }(),
+		func() deuces.Card { c, _ := deuces.NewCard("Th"); return c }(),
 	}
 
 	// pretty print cards to console - skipping direct print test, focusing on logic
 
 	// create an evaluator
-	evaluator := NewEvaluator()
+	evaluator := deuces.NewEvaluator()
 
 	// and rank your hand
 	rank := evaluator.Evaluate(hand, board)

@@ -24,7 +24,7 @@ func main() {
 	defer pprof.StopCPUProfile()
 
 	// Open the CSV file
-	file, err := os.Open("../../../performance/hands_and_boards.csv")
+	file, err := os.Open("./hands_and_boards.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
