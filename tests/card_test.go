@@ -1,7 +1,7 @@
 package deuces_test
 
 import (
-	"go-deuces"
+	"github.com/gregory-chatelier/go-deuces"
 	"testing"
 )
 

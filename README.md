@@ -20,14 +20,14 @@ To build and run this project, you need to have Go installed on your system. You
 1.  **Clone the repository:**
 
     ```bash
-    git clone https://github.com/your-username/go-deuces.git
+    git clone https://github.com/gregory-chatelier/go-deuces.git
     cd go-deuces
     ```
 
 2.  **Initialize Go module (if not already done):**
 
     ```bash
-    go mod init go-deuces
+    go mod init github.com/gregory-chatelier/go-deuces
     ```
 
 3.  **Run tests to verify the installation:**
@@ -45,7 +45,7 @@ package main
 
 import (
 	"fmt"
-	"go-deuces/deuces"
+	"github.com/gregory-chatelier/go-deuces/deuces"
 )
 
 func main() {
@@ -69,7 +69,7 @@ package main
 
 import (
 	"fmt"
-	"go-deuces/deuces"
+	"github.com/gregory-chatelier/go-deuces/deuces"
 )
 
 func main() {
@@ -95,7 +95,7 @@ package main
 
 import (
 	"fmt"
-	"go-deuces/deuces"
+	"github.com/gregory-chatelier/go-deuces/deuces"
 )
 
 func mustNewCard(s string) deuces.Card {

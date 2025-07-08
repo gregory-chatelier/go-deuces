@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"go-deuces"
+	"github.com/gregory-chatelier/go-deuces"
 )
 
 func main() {
