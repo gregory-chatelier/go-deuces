@@ -145,3 +145,35 @@ func main() {
 ## Performance
 
 Based on benchmarks, this Go port evaluates poker hands approximately 6 to 7 times faster than the original Python Deuces library. This performance gain is achieved without leveraging Go's native threading capabilities. While significantly faster than the Python version, it's important to note that this implementation is still slower than highly optimized C/C++ implementations like Pokerstove.
+
+## Monte Carlo Simulation
+
+This library provides a Monte Carlo simulation feature to estimate the win probability of a poker hand against a given number of opponents.
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/gregory-chatelier/go-deuces"
+)
+
+func mustNewCard(s string) deuces.Card {
+	card, err := deuces.NewCard(s)
+	if err != nil {
+		panic(fmt.Sprintf("failed to create card %s: %v", s, err))
+	}
+	return card
+}
+
+func main() {
+	hand := []deuces.Card{mustNewCard("As"), mustNewCard("Ks")}
+	board := []deuces.Card{mustNewCard("Qs"), mustNewCard("Js"), mustNewCard("Ts")}
+	numOpponents := 2
+	iterations := 100000 // Number of simulations
+
+	probability := deuces.EstimateWinProbability(hand, board, numOpponents, iterations)
+	fmt.Printf("Estimated win probability: %.2f%%
+", probability*100)
+}
+```

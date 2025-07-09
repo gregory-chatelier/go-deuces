@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
+
 	"github.com/gregory-chatelier/go-deuces"
 )
 
@@ -27,7 +30,8 @@ func main() {
 
 	// --- Deck Usage ---
 	fmt.Println("--- Deck Usage ---")
-	deck := deuces.NewDeck()
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+	deck := deuces.NewDeckWithRNG(rng)
 	hands := deck.Draw(5)
 	fmt.Print("Drawn cards: ")
 	for _, c := range hands {
@@ -57,4 +61,15 @@ func main() {
 	fmt.Printf("Hand class: %s\n", evaluator.ClassToString(rankClass))
 	percentage := evaluator.GetFiveCardRankPercentage(rank)
 	fmt.Printf("Percentage rank: %.2f%%\n", percentage*100)
+	fmt.Println()
+
+	// --- Monte Carlo Simulation ---
+	fmt.Println("--- Monte Carlo Simulation ---")
+	handMC := []deuces.Card{mustNewCard("As"), mustNewCard("2s")}
+	boardMC := []deuces.Card{mustNewCard("Qs"), mustNewCard("Th"), mustNewCard("Ts")}
+	numOpponents := 3
+	iterations := 100000 // Number of simulations
+
+	probability := deuces.EstimateWinProbability(handMC, boardMC, numOpponents, iterations)
+	fmt.Printf("Estimated win probability: %.2f%%\n", probability*100)
 }

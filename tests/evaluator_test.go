@@ -222,6 +222,6 @@ func TestEvaluator_GetFiveCardRankPercentage(t *testing.T) {
 	}
 	// Worst hand
 	if percentage := e.GetFiveCardRankPercentage(7462); percentage != 1.0 {
-				t.Errorf("Worst hand percentage = %f, want %f", percentage, 1.0)
+		t.Errorf("Worst hand percentage = %f, want %f", percentage, 1.0)
 	}
 }
