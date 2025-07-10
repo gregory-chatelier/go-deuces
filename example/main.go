@@ -65,8 +65,8 @@ func main() {
 
 	// --- Monte Carlo Simulation ---
 	fmt.Println("--- Monte Carlo Simulation ---")
-	handMC := []deuces.Card{mustNewCard("As"), mustNewCard("2s")}
-	boardMC := []deuces.Card{mustNewCard("Qs"), mustNewCard("Th"), mustNewCard("Ts")}
+	handMC := []deuces.Card{mustNewCard("As"), mustNewCard("Ks")}
+	boardMC := []deuces.Card{mustNewCard("Qs"), mustNewCard("Js"), mustNewCard("Ts")}
 	numOpponents := 3
 	iterations := 100000 // Number of simulations
 
