@@ -33,7 +33,15 @@ func (e *Evaluator) evaluateFive(cards []Card) int {
 	if (cards[0]&cards[1]&cards[2]&cards[3]&cards[4])&0xF000 != 0 {
 		handOR := (cards[0] | cards[1] | cards[2] | cards[3] | cards[4]) >> 16
 		prime := primeProductFromRankbits(int(handOR))
-		return e.lookupTable.FlushLookup[prime]
+
+		// Check for straight flush
+		if value, ok := e.lookupTable.FlushLookup[prime]; ok {
+			return value
+		}
+
+		// It's a regular flush, use the unsuited lookup
+		prime = primeProductFromHand(cards)
+		return e.lookupTable.UnsuitedLookup[prime]
 	}
 
 	// otherwise

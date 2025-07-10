@@ -122,7 +122,7 @@ func TestEstimateWinProbability_Scenarios(t *testing.T) {
 	})
 
 	t.Run("PocketAcesPreFlopVsOneOpponent", func(t *testing.T) {
-		const iterations = 20000
+		const iterations = 100000
 		hand := []deuces.Card{mustNewCard("As"), mustNewCard("Ac")}
 		board := []deuces.Card{}
 		result, err := deuces.EstimateWinProbability(hand, board, 1, iterations)
@@ -135,22 +135,22 @@ func TestEstimateWinProbability_Scenarios(t *testing.T) {
 		}
 	})
 
-	// t.Run("SuitedConnectorsPostFlop", func(t *testing.T) {
-	// 	const iterations = 20000
-	// 	// User has a flush and a straight flush draw
-	// 	hand := []deuces.Card{mustNewCard("8s"), mustNewCard("7s")}
-	// 	board := []deuces.Card{mustNewCard("6s"), mustNewCard("5s"), mustNewCard("As")}
-	// 	result, err := deuces.EstimateWinProbability(hand, board, 2, iterations)
-	// 	if err != nil {
-	// 		t.Fatalf("Did not expect error, but got: %v", err)
-	// 	}
-	// 	if result.WinProbability < 0.55 {
-	// 		t.Errorf("Suited Connectors Post-Flop: Expected high win probability, got %.2f%%", result.WinProbability*100)
-	// 	}
-	// })
+	t.Run("SuitedConnectorsPostFlop", func(t *testing.T) {
+		const iterations = 100000
+		// User has a flush and a straight flush draw
+		hand := []deuces.Card{mustNewCard("8s"), mustNewCard("7s")}
+		board := []deuces.Card{mustNewCard("6s"), mustNewCard("5s"), mustNewCard("As")}
+		result, err := deuces.EstimateWinProbability(hand, board, 2, iterations)
+		if err != nil {
+			t.Fatalf("Did not expect error, but got: %v", err)
+		}
+		if result.WinProbability < 0.55 {
+			t.Errorf("Suited Connectors Post-Flop: Expected high win probability, got %.2f%%", result.WinProbability*100)
+		}
+	})
 
 	t.Run("AKPreFlopVsOneOpponent", func(t *testing.T) {
-		const iterations = 20000
+		const iterations = 100000
 		hand := []deuces.Card{mustNewCard("As"), mustNewCard("Kc")}
 		board := []deuces.Card{}
 		result, err := deuces.EstimateWinProbability(hand, board, 1, iterations)
@@ -160,6 +160,34 @@ func TestEstimateWinProbability_Scenarios(t *testing.T) {
 		// General probability for AK vs any random hand is ~66%
 		if result.WinProbability < 0.60 || result.WinProbability > 0.70 {
 			t.Errorf("AK vs Any: Expected win probability around 66%%, got %.2f%%", result.WinProbability*100)
+		}
+	})
+
+	t.Run("PocketAcesPreFlopVsFiveOpponents", func(t *testing.T) {
+		const iterations = 100000
+		hand := []deuces.Card{mustNewCard("As"), mustNewCard("Ac")}
+		board := []deuces.Card{}
+		result, err := deuces.EstimateWinProbability(hand, board, 5, iterations)
+		if err != nil {
+			t.Fatalf("Did not expect error, but got: %v", err)
+		}
+		// Win probability for AA vs 5 random hands is ~50%
+		if result.WinProbability < 0.25 || result.WinProbability > 0.35 {
+			t.Errorf("Pocket Aces vs 5: Expected win probability around 30%%, got %.2f%%", result.WinProbability*100)
+		}
+	})
+
+	t.Run("RandomHandPreFlopVsEightOpponents", func(t *testing.T) {
+		const iterations = 100000
+		hand := []deuces.Card{mustNewCard("7h"), mustNewCard("2d")}
+		board := []deuces.Card{}
+		result, err := deuces.EstimateWinProbability(hand, board, 8, iterations)
+		if err != nil {
+			t.Fatalf("Did not expect error, but got: %v", err)
+		}
+		// Win probability for a very weak hand vs 8 random hands should be very low, e.g., < 0.05
+		if result.WinProbability > 0.05 {
+			t.Errorf("Random Hand vs 8: Expected win probability less than 5%%, got %.2f%%", result.WinProbability*100)
 		}
 	})
 }
