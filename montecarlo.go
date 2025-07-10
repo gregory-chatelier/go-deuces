@@ -1,28 +1,57 @@
 package deuces
 
 import (
+	"fmt"
 	"math/rand"
 	"runtime"
 	"sync"
 	"time"
 )
 
+const (
+	MaxOpponents  = 9
+	MinIterations = 1000
+)
+
+// HandResult represents the complete breakdown of Monte Carlo simulation results
+type HandResult struct {
+	WinProbability      float64 // Probability of having the best hand
+	TieProbability      float64 // Probability of tying for the best hand
+	LossProbability     float64 // Probability of losing
+	WinOrTieProbability float64 // Combined probability of winning or tying (not losing money)
+	TotalIterations     int     // Total number of simulations run
+}
+
+// String provides a formatted string representation of the results
+func (hr HandResult) String() string {
+	return fmt.Sprintf(
+		"Win: %.2f%%, Tie: %.2f%%, Loss: %.2f%%, Win+Tie: %.2f%% (from %d iterations)",
+		hr.WinProbability*100,
+		hr.TieProbability*100,
+		hr.LossProbability*100,
+		hr.WinOrTieProbability*100,
+		hr.TotalIterations,
+	)
+}
+
 // EstimateWinProbability estimates the probability of winning a poker hand using Monte Carlo simulation.
-// It takes the user's hand, the community board cards, the number of opponents, and the number of iterations
-// for the simulation.
-func EstimateWinProbability(hand []Card, board []Card, numOpponents int, iterations int) float64 {
+// It returns a detailed breakdown of win/tie/loss probabilities.
+func EstimateWinProbability(hand []Card, board []Card, numOpponents int, iterations int) (*HandResult, error) {
 	// Input Validation
 	if len(hand) != 2 {
-		panic("hand must contain exactly two cards")
+		return nil, fmt.Errorf("hand must contain exactly two cards, got %d", len(hand))
 	}
 	if len(board) > 5 {
-		panic("board must contain between 0 and 5 cards")
+		return nil, fmt.Errorf("board must contain between 0 and 5 cards, got %d", len(board))
 	}
 	if numOpponents < 0 {
-		panic("number of opponents cannot be negative")
+		return nil, fmt.Errorf("number of opponents cannot be negative, got %d", numOpponents)
 	}
-	if iterations <= 0 {
-		panic("iterations must be a positive number")
+	if numOpponents > MaxOpponents {
+		return nil, fmt.Errorf("number of opponents should not exceed %d for a full player game, got %d", MaxOpponents, numOpponents)
+	}
+	if iterations < MinIterations {
+		return nil, fmt.Errorf("iterations should be at least %d to ensure reliability, got %d", MinIterations, iterations)
 	}
 
 	// Initialize evaluator
@@ -30,23 +59,19 @@ func EstimateWinProbability(hand []Card, board []Card, numOpponents int, iterati
 
 	// Use a WaitGroup to wait for all goroutines to finish
 	var wg sync.WaitGroup
-	// Use channels to collect results from goroutines
-	wins := make(chan int, runtime.NumCPU())
-	ties := make(chan int, runtime.NumCPU())
+
+	// Channel to collect results from goroutines
+	type workerResult struct {
+		wins   int
+		ties   int
+		losses int
+	}
+	results := make(chan workerResult, runtime.NumCPU())
 
 	// Determine the number of goroutines to use
-	numWorkers := min(runtime.NumCPU(), iterations) // Don't create more workers than iterations
-	if numWorkers == 0 {                            // Handle case where NumCPU might return 0 or 1 on some systems
-		numWorkers = 1
-	}
-
+	numWorkers := min(runtime.NumCPU(), iterations)
 	iterationsPerWorker := iterations / numWorkers
 	remainingIterations := iterations % numWorkers
-
-	// Pre-filter the deck
-	masterDeck := NewDeck()
-	masterDeck.Remove(hand...)
-	masterDeck.Remove(board...)
 
 	// Launch goroutines
 	for i := 0; i < numWorkers; i++ {
@@ -56,78 +81,96 @@ func EstimateWinProbability(hand []Card, board []Card, numOpponents int, iterati
 		}
 
 		wg.Add(1)
-		go func(workerIter int) {
+		go func(workerID int, workerIter int) {
 			defer wg.Done()
 
-			workerWins := 0
-			workerTies := 0
+			var workerWins, workerTies, workerLosses int
 
-			// Create a new random source for each goroutine
-			rng := rand.New(rand.NewSource(time.Now().UnixNano() + int64(i)))
+			// Create a unique random source for each goroutine
+			// Use workerID and current time to ensure different sequences
+			seed := time.Now().UnixNano() + int64(workerID)*1000000
+			rng := rand.New(rand.NewSource(seed))
 
-			// Create a local copy of the master deck for this goroutine
-			deck := &Deck{Cards: make([]Card, len(masterDeck.Cards))}
-			copy(deck.Cards, masterDeck.Cards)
+			for j := 0; j < workerIter; j++ {
+				// Create a fresh deck for each iteration
+				deck := NewDeckWithRNG(rng)
 
-			for range workerIter {
-				// Create a new copy of the local deck for each iteration
-				iterDeck := &Deck{Cards: make([]Card, len(deck.Cards))}
-				copy(iterDeck.Cards, deck.Cards)
-
-				// Shuffle the iteration deck
-				iterDeck.Shuffle(rng)
+				// Combine known cards for removal
+				allKnownCards := append(hand, board...)
+				deck.Remove(allKnownCards...)
 
 				// Deal remaining board cards
 				currentBoard := make([]Card, len(board))
-				copy(currentBoard, board)
+				copy(currentBoard, board) // Copy to avoid modifying the original board slice
 
-				// Draw the remaining cards for the board
-				remainingBoardCards := 5 - len(board)
-				currentBoard = append(currentBoard, iterDeck.Cards[:remainingBoardCards]...)
+				for len(currentBoard) < 5 {
+					currentBoard = append(currentBoard, deck.Draw(1)...)
+				}
 
 				// Evaluate user's hand
 				userRank := evaluator.Evaluate(hand, currentBoard)
 
-				// Find the best opponent hand
-				bestOpponentRank := MaxHighCard
-				opponentDeck := &Deck{Cards: iterDeck.Cards[remainingBoardCards:]}
+				// Simulate opponents' hands and track results
+				userHasBestHand := true
+				userTiedForBest := false
+
 				for k := 0; k < numOpponents; k++ {
-					opponentHand := opponentDeck.Draw(2)
+					opponentHand := deck.Draw(2)
 					opponentRank := evaluator.Evaluate(opponentHand, currentBoard)
-					if opponentRank < bestOpponentRank {
-						bestOpponentRank = opponentRank
+
+					if opponentRank < userRank { // Opponent has a better hand (lower rank = better)
+						userHasBestHand = false
+						userTiedForBest = false
+						break // User loses, no need to check other opponents
+					} else if opponentRank == userRank { // Tie with this opponent
+						userTiedForBest = true
 					}
 				}
 
-				// Compare user's hand to the best opponent hand
-				if userRank < bestOpponentRank {
+				// Categorize the result
+				if userHasBestHand && !userTiedForBest {
 					workerWins++
-				} else if userRank == bestOpponentRank {
+				} else if userHasBestHand && userTiedForBest {
 					workerTies++
+				} else {
+					workerLosses++
 				}
 			}
-			wins <- workerWins
-			ties <- workerTies
-		}(workerIterations)
+
+			results <- workerResult{
+				wins:   workerWins,
+				ties:   workerTies,
+				losses: workerLosses,
+			}
+		}(i, workerIterations)
 	}
 
 	// Wait for all goroutines to finish
 	wg.Wait()
-	close(wins)
-	close(ties)
+	close(results)
 
 	// Aggregate results
-	totalWins := 0
-	for w := range wins {
-		totalWins += w
+	var totalWins, totalTies, totalLosses int
+	for result := range results {
+		totalWins += result.wins
+		totalTies += result.ties
+		totalLosses += result.losses
 	}
 
-	totalTies := 0
-	for t := range ties {
-		totalTies += t
-	}
-
-	// Calculate probability
-	// Ties are counted as half a win
-	return (float64(totalWins) + float64(totalTies)/2.0) / float64(iterations)
+	// Calculate probabilities
+	fIterations := float64(iterations)
+	return &HandResult{
+		WinProbability:      float64(totalWins) / fIterations,
+		TieProbability:      float64(totalTies) / fIterations,
+		LossProbability:     float64(totalLosses) / fIterations,
+		WinOrTieProbability: float64(totalWins+totalTies) / fIterations,
+		TotalIterations:     iterations,
+	}, nil
 }
+
+// // Basic usage
+// result, err := EstimateWinProbability(hand, board, 3, 100000)
+// if err != nil {
+//     log.Fatal(err)
+// }
+// fmt.Println(result) // Uses the String() method
