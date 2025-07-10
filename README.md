@@ -169,11 +169,14 @@ func mustNewCard(s string) deuces.Card {
 func main() {
 	hand := []deuces.Card{mustNewCard("As"), mustNewCard("Ks")}
 	board := []deuces.Card{mustNewCard("Qs"), mustNewCard("Js"), mustNewCard("Ts")}
-	numOpponents := 2
+	numOpponents := 3
 	iterations := 100000 // Number of simulations
 
-	probability := deuces.EstimateWinProbability(hand, board, numOpponents, iterations)
-	fmt.Printf("Estimated win probability: %.2f%%\n", probability*100)
+	result, err := deuces.EstimateWinProbability(hand, board, numOpponents, iterations)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(result)
 }
 ```
 

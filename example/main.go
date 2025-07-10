@@ -70,6 +70,9 @@ func main() {
 	numOpponents := 3
 	iterations := 100000 // Number of simulations
 
-	probability := deuces.EstimateWinProbability(handMC, boardMC, numOpponents, iterations)
-	fmt.Printf("Estimated win probability: %.2f%%\n", probability*100)
+	result, err := deuces.EstimateWinProbability(handMC, boardMC, numOpponents, iterations)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(result)
 }
